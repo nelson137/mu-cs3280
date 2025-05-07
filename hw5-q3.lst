@@ -1,0 +1,77 @@
+0001                         **************************************************
+0002                         * Homework 5 Question 3
+0003                         * Nelson Earle
+0004                         * 2020-11-18
+0005                         *
+0006                         * The main program will put $FF, $00, $FF, $00, ...
+0007                         *   on PortC indefinitely.
+0008                         * The interrupt routine will increment the global
+0009                         *   counter variable RESULT.
+0010                         **************************************************
+0011                         
+0012                         
+0013 d000                    	ORG	$D000
+0014 d000                    RESULT	RMB	2
+0015 1003                    PORTC	EQU	$1003
+0016 1007                    DDRC	EQU	$1007
+0017                         
+0018                         
+0019                         **************************************************
+0020                         * MAIN
+0021                         **************************************************
+0022                         
+0023                         
+0024 c000                    	ORG	$C000
+0025                         MAIN
+0026                         * initialize stack
+0027 c000 8e 01 ff           	LDS	#$01FF
+0028                         
+0029                         * enable interrupts
+0030 c003 0e                 	CLI
+0031                         
+0032                         * setup PORTC
+0033 c004 7f 10 03           	CLR	PORTC
+0034 c007 86 ff              	LDAA	#%11111111
+0035 c009 b7 10 07           	STAA	DDRC
+0036                         
+0037                         * initialize RESULT counter
+0038 c00c cc 00 00           	LDD	#$0000
+0039 c00f fd d0 00           	STD	RESULT
+0040                         
+0041                         * initialize PORTC output data
+0042 c012 cc 00 ff           	LDD	#$00FF
+0043                         
+0044                         * infinite loop
+0045                         * uses NOP to mostly even out the length of time
+0046                         * that $00 and $FF are on PortC
+0047                         * ($00 is on for 1 less clock cycle than $FF)
+0048 c015 b7 10 03           LOOP	STAA	PORTC	* 4 clock cycles
+0049 c018 01                 	NOP		* 2 clock cycles
+0050 c019 f7 10 03           	STAB	PORTC	* 4 clock cycles
+0051 c01c 20 f7              	BRA	LOOP	* 3 clock cycles
+0052                         
+0053                         
+0054                         **************************************************
+0055                         * ISR
+0056                         **************************************************
+0057                         
+0058                         
+0059 b000                    	ORG	$B000
+0060                         ISR
+0061                         * increment RESULT
+0062 b000 fc d0 00           	LDD	RESULT
+0063 b003 cb 01              	ADDB	#$01
+0064 b005 89 00              	ADCA	#$00
+0065 b007 fd d0 00           	STD	RESULT
+0066 b00a 3b                 	RTI
+0067                         
+0068                         * store ISR addr in the interrupt vector
+0069 fff2                    	ORG	$FFF2
+0070 fff2 b0 00              	FDB	ISR
+
+DDRC       1007
+ISR        b000
+LOOP       c015
+MAIN       c000
+PORTC      1003
+RESULT     d000

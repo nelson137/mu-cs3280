@@ -1,0 +1,107 @@
+0001                         **************************************
+0002                         *
+0003                         * Name: Nelson Earle
+0004                         * ID: 12550087
+0005                         * Date: 2020/10/12
+0006                         * Lab2
+0007                         *
+0008                         * Program description: Calculate the N'th Fibonacci number
+0009                         *
+0010                         * Pseudocode:
+0011                         *
+0012                         * int main() {
+0013                         *     long unsigned X;
+0014                         *     long unsigned CURR;
+0015                         *     long unsigned LAST;
+0016                         *     long unsigned RESULT;
+0017                         *
+0018                         *     X = 2;
+0019                         *     CURR = 1;
+0020                         *     LAST = 1;
+0021                         *     RESULT = 1;
+0022                         *
+0023                         *     while (X < N) {
+0024                         *         RESULT = LAST + CURR;
+0025                         *         LAST = CURR;
+0026                         *         CURR = RESULT;
+0027                         *         X++;
+0028                         *     }
+0029                         * }
+0030                         *
+0031                         **************************************
+0032                         
+0033                         ** data section
+0034                         
+0035 b000                    	ORG	$B000
+0036 b000 28                 N	FCB	40
+0037 b010                    	ORG	$B010
+0038 b010                    RESULT	RMB	4
+0039                         
+0040                         * define any other variables that you might need here
+0041 b020                    	ORG	$B020
+0042 b020 02                 X	FCB	2
+0043                         
+0044 b030                    	ORG	$B030
+0045 b030                    CURR	RMB	4
+0046 b034                    LAST	RMB	4
+0047                         
+0048                         ** program section
+0049                         
+0050 c000                    	ORG	$C000
+0051 c000 cc 00 01           	LDD	#1
+0052 c003 fd b0 10           	STD	RESULT
+0053 c006 fd b0 32           	STD	CURR+2
+0054 c009 fd b0 36           	STD	LAST+2
+0055 c00c cc 00 00           	LDD	#0
+0056 c00f fd b0 30           	STD	CURR
+0057 c012 fd b0 34           	STD	LAST
+0058                         
+0059                         * while (X < N)
+0060 c015 b6 b0 20           WHILE	LDA	X
+0061 c018 b1 b0 00           	CMPA	N
+0062 c01b 24 35              	BHS	END
+0063                         
+0064                         * RESULT = LAST + CURR
+0065                         * calculate the lower half (2 bytes) of the next fib num
+0066 c01d fc b0 36           	LDD	LAST+2
+0067 c020 fb b0 33           	ADDB	CURR+3	* lower byte of the lower half
+0068 c023 b9 b0 32           	ADCA	CURR+2	* upper byte of the lower half
+0069 c026 fd b0 12           	STD	RESULT+2
+0070                         
+0071                         * RESULT = LAST + CURR
+0072                         * calculate the upper half (2 bytes) of the next fib num
+0073 c029 fc b0 34           	LDD	LAST
+0074 c02c f9 b0 31           	ADCB	CURR+1	* lower byte of the upper half
+0075 c02f b9 b0 30           	ADCA	CURR	* upper byte of the upper half
+0076 c032 fd b0 10           	STD	RESULT
+0077                         
+0078                         * LAST = CURR
+0079                         * save the last calculated fib number to LAST (4 bytes)
+0080 c035 fc b0 32           	LDD	CURR+2
+0081 c038 fd b0 36           	STD	LAST+2
+0082 c03b fc b0 30           	LDD	CURR
+0083 c03e fd b0 34           	STD	LAST
+0084                         
+0085                         * CURR = RESULT
+0086                         * save the current fib num to CURR (4 bytes)
+0087 c041 fc b0 12           	LDD	RESULT+2
+0088 c044 fd b0 32           	STD	CURR+2
+0089 c047 fc b0 10           	LDD	RESULT
+0090 c04a fd b0 30           	STD	CURR
+0091                         
+0092                         * increment the fib index counter
+0093 c04d 7c b0 20           	INC	X
+0094                         
+0095                         * jump to top of loop body
+0096 c050 20 c3              	BRA	WHILE
+0097                         
+0098                         * infinite loop
+0099 c052 20 fe              END	BRA	END
+
+CURR       b030
+END        c052
+LAST       b034
+N          b000
+RESULT     b010
+WHILE      c015
+X          b020

@@ -1,0 +1,36 @@
+0001                         **************************************************
+0002                         *
+0003                         *  This program will add data1 and data3 and subtract data2
+0004                         *  Nelson Earle (nwewnh)
+0005                         *  2020/9/18
+0006                         *
+0007                         *    Step  |  PC     |  Register A  |  Mem $B003  |  NZVC
+0008                         *  --------------------------------------------------------
+0009                         *    1     |  $C000  |  $0A         |  $0000      |  0000
+0010                         *    2     |  $C000  |  $FB         |  $0000      |  1001
+0011                         *    3     |  $C000  |  $15         |  $0000      |  0001
+0012                         *    4     |  $C000  |  $0A         |  $000F      |  0001
+0013                         *
+0014                         **************************************************
+0015                         
+0016                         * data location starts at $B000
+0017 b000                    			ORG	$B000
+0018 b000 0a                 DATA1		FCB	10		$B000 : declare 1-byte variable DATA1 with value 10
+0019 b001 0f                 DATA2		FCB	15		$B001 : declare 1-byte variable DATA2 with value 15
+0020 b002 1a                 DATA3		FCB	$1A		$B002 : declare 1-byte variable DATA3 with value $1A
+0021 b003                    RESULT	RMB	1		$B003 : declare 1-byte variable RESULT
+0022                         
+0023                         * main program starts at $C000
+0024 c000                    	ORG	$C000
+0025 c000 b6 b0 00           	LDAA	DATA1		1) regA = DATA1
+0026 c003 b0 b0 01           	SUBA	DATA2		2) regA -= DATA2
+0027 c006 bb b0 02           	ADDA	DATA3		3) regA += DATA3
+0028 c009 b7 b0 03           	STAA	RESULT	4) RESULT = regA
+0029 c00c 20 fe              DONE	BRA	DONE		infinite loop
+0030                         	END
+
+DATA1      b000
+DATA2      b001
+DATA3      b002
+DONE       c00c
+RESULT     b003

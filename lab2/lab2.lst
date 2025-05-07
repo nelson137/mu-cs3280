@@ -1,0 +1,91 @@
+0001                         **************************************
+0002                         *
+0003                         * Name: Nelson Earle
+0004                         * ID: 12550087
+0005                         * Date: 2020/09/29
+0006                         * Lab2
+0007                         *
+0008                         * Program description: Calculate the N'th Fibonacci number
+0009                         *
+0010                         * Pseudocode:
+0011                         *
+0012                         * int main() {
+0013                         *     long unsigned X;
+0014                         *     long unsigned CURR;
+0015                         *     long unsigned LAST;
+0016                         *     long unsigned RESULT;
+0017                         *
+0018                         *     X = 2;
+0019                         *     CURR = 1;
+0020                         *     LAST = 1;
+0021                         *     RESULT = 1;
+0022                         *
+0023                         *     while (X < N) {
+0024                         *         RESULT = LAST + CURR;
+0025                         *         LAST = CURR;
+0026                         *         CURR = RESULT;
+0027                         *         X++;
+0028                         *     }
+0029                         * }
+0030                         *
+0031                         **************************************
+0032                         
+0033                         ** data section
+0034                         
+0035 b000                    	ORG	$B000
+0036 b000 01                 N	FCB	1
+0037                         
+0038 b010                    	ORG	$B010
+0039 b010                    RESULT	RMB	2
+0040                         
+0041                         * define any other variables that you might need here
+0042 b020                    	ORG	$B020
+0043 b020 02                 X	FCB	2
+0044                         
+0045 b030                    	ORG	$B030
+0046 b030 00 01              CURR  FDB	1
+0047 b032 00 01              LAST	FDB	1
+0048                         
+0049                         ** program section
+0050                         
+0051 c000                    	ORG	$C000
+0052 c000 cc 00 01           	LDD	#1
+0053 c003 fd b0 10           	STD	RESULT
+0054                         
+0055                         * while (X < N)
+0056 c006 b6 b0 20           WHILE	LDA	X
+0057 c009 b1 b0 00           	CMPA	N
+0058 c00c 24 1a              	BHS	END
+0059                         
+0060                         * RESULT = LAST + CURR
+0061                         * calculate the next fib num
+0062 c00e fc b0 32           	LDD	LAST
+0063 c011 f3 b0 30           	ADDD	CURR
+0064 c014 fd b0 10           	STD	RESULT
+0065                         
+0066                         * LAST = CURR
+0067                         * save the last calculated fib number to LAST
+0068 c017 fc b0 30           	LDD	CURR
+0069 c01a fd b0 32           	STD	LAST
+0070                         
+0071                         * CURR = RESULT
+0072                         * save the current fib num to CURR
+0073 c01d fc b0 10           	LDD	RESULT
+0074 c020 fd b0 30           	STD	CURR
+0075                         
+0076                         * increment the fib index counter
+0077 c023 7c b0 20           	INC	X
+0078                         
+0079                         * jump to top of loop body
+0080 c026 20 de              	BRA	WHILE
+0081                         
+0082                         * infinite loop
+0083 c028 20 fe              END	BRA	END
+
+CURR       b030
+END        c028
+LAST       b032
+N          b000
+RESULT     b010
+WHILE      c006
+X          b020

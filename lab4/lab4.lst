@@ -1,0 +1,244 @@
+0001                         **************************************************
+0002                         *
+0003                         * Name: Nelson Earle
+0004                         * ID:	  12550087
+0005                         * Date: 2020/10/28	
+0006                         * Lab4
+0007                         *
+0008                         * Program description:
+0009                         *   Calculate the N'th fibonacci number for each N in a given
+0010                         *   array. The calculation is done in a subroutine using pass
+0011                         *   by value.
+0012                         *
+0013                         * Pseudocode of Main Program:
+0014                         *
+0015                         * int main() {
+0016                         *     __uint8_t NARR[] = {1, 2, 5, 10, 20, 128, 254, 255, 0};
+0017                         *     __uint32_t RESARR[8];
+0018                         *
+0019                         *     __uint8_t N;
+0020                         *     __uint32_t RES;
+0021                         *
+0022                         *     __uint8_t *N_PTR;
+0023                         *     __uint32_t *R_PTR;
+0024                         *
+0025                         *     N_PTR = &NARR[0];
+0026                         *     R_PTR = &RESARR[0];
+0027                         *
+0028                         *     while (*N_PTR != 0) {
+0029                         *         N = *N_PTR;
+0030                         *         RES = FIB(N);
+0031                         *         *R_PTR = RES;
+0032                         *         N_PTR++;
+0033                         *         R_PTR++;
+0034                         *     }
+0035                         * }
+0036                         *
+0037                         *-------------------------------------------------
+0038                         *
+0039                         * Pseudocode of Subroutine:
+0040                         *
+0041                         * __uint32_t FIB(unsigned char N) {
+0042                         *     __uint32_t X;
+0043                         *     __uint32_t CURR;
+0044                         *     __uint32_t LAST;
+0045                         *     __uint32_t RES;
+0046                         *
+0047                         *     X = 2;
+0048                         *     CURR = 1;
+0049                         *     LAST = 1;
+0050                         *     RES = 1;
+0051                         *
+0052                         *     while (X < N) {
+0053                         *         RES = LAST + CURR;
+0054                         *         LAST = CURR;
+0055                         *         CURR = RES;
+0056                         *         X++;
+0057                         *     }
+0058                         *
+0059                         *     return RES;
+0060                         * }
+0061                         *
+0062                         **************************************************
+0063                         
+0064                         
+0065                         * data section
+0066 b000                    	ORG $B000
+0067 b000 01 02 05 0a 14 80  NARR	FCB	1, 2, 5, 10, 20, 128, 254, 255, $00
+     fe ff 00
+0068 0000                    SENTIN	EQU	$00
+0069                         
+0070 b010                    	ORG $B010
+0071 b010                    RESARR	RMB	32	
+0072                         
+0073                         
+0074                         **************************************************
+0075                         *
+0076                         * MAIN
+0077                         *
+0078                         **************************************************
+0079                         
+0080                         
+0081                         * variables for main
+0082 bff0                    	ORG	$BFF0
+0083                         
+0084                         * main program
+0085 c000                    	ORG	$C000
+0086 c000 8e 01 ff           	LDS	#$01FF	* initialize stack pointer
+0087                         
+0088 c003 ce b0 00           	LDX	#NARR	* N_PTR = &NARR[0]
+0089 c006 18 ce b0 10        	LDY	#RESARR	* R_PTR = &RESARR[0]
+0090                         
+0091                         * while (*N_PTR != 0)
+0092 c00a a6 00              WHILE1	LDAA	0,X
+0093 c00c 81 00              	CMPA	#SENTIN
+0094 c00e 27 18              	BEQ	DONE1
+0095                         
+0096                         * call fib with call-by-value in register: FIB(N)
+0097 c010 bd d0 00           	JSR	FIB	* N = A reg
+0098                         
+0099                         * store FIB return value in RESARR: *R_PTR = RES
+0100 c013 32                 	PULA		* pull result's 2 high bytes off stack
+0101 c014 33                 	PULB
+0102 c015 18 ed 00           	STD	0,Y	* store result's 2 high bytes in RESARR
+0103 c018 32                 	PULA		* pull result's 2 low bytes off stack
+0104 c019 33                 	PULB
+0105 c01a 18 ed 02           	STD	2,Y	* store result's 2 low bytes in RESARR
+0106                         
+0107 c01d 08                 	INX		* N_PTR++
+0108 c01e 18 08              	INY		* R_PTR++
+0109 c020 18 08              	INY
+0110 c022 18 08              	INY
+0111 c024 18 08              	INY
+0112                         
+0113 c026 20 e2              	BRA	WHILE1
+0114                         DONE1
+0115                         * end while
+0116                         
+0117 c028 20 fe              END	BRA	END
+0118                         
+0119                         
+0120                         **************************************************
+0121                         *
+0122                         * SUBROUTINE
+0123                         *
+0124                         **************************************************
+0125                         
+0126                         
+0127                         * register caches
+0128 cfe0                    	ORG	$CFE0
+0129 cfe0                    RADDR	RMB	2
+0130 cfe2                    REG_B	RMB	1
+0131 cfe3                    REG_X	RMB	2
+0132 cfe5                    REG_Y	RMB	2
+0133                         
+0134                         * variables for subroutine
+0135 cff0                    	ORG	$CFF0
+0136 cff0                    N	RMB	1
+0137 cff1                    X	RMB	1
+0138 cff2                    RES	RMB	4
+0139 cff6                    CUR	RMB	4
+0140 cffa                    LAST	RMB	4
+0141                         
+0142                         
+0143                         * subroutine
+0144 d000                    	ORG	$D000
+0145                         FIB
+0146                         * cache register values
+0147 d000 b7 cf f0           	STAA	N	* save parameter (fib num index) to variable N
+0148 d003 f7 cf e2           	STAB	REG_B
+0149 d006 ff cf e3           	STX	REG_X
+0150 d009 18 ff cf e5        	STY	REG_Y
+0151                         
+0152 d00d 38                 	PULX		* save return addr
+0153 d00e 34                 	DES		* open hole for return value
+0154 d00f 34                 	DES
+0155 d010 34                 	DES
+0156 d011 34                 	DES
+0157 d012 3c                 	PSHX		* restore return addr
+0158                         
+0159                         * initialize local variables
+0160 d013 cc 00 00           	LDD	#0
+0161 d016 fd cf f2           	STD	RES
+0162 d019 fd cf f6           	STD	CUR
+0163 d01c fd cf fa           	STD	LAST
+0164 d01f cc 00 01           	LDD	#1
+0165 d022 fd cf f4           	STD	RES+2
+0166 d025 fd cf f8           	STD	CUR+2
+0167 d028 fd cf fc           	STD	LAST+2
+0168 d02b 86 02              	LDAA	#2
+0169 d02d b7 cf f1           	STA	X
+0170                         
+0171                         * while (X < N)
+0172 d030 b6 cf f1           WHILE2	LDA	X
+0173 d033 b1 cf f0           	CMPA	N
+0174 d036 24 35              	BHS	DONE2
+0175                         
+0176                         * RESULT = LAST + CUR
+0177                         * calculate the lower half (2 bytes) of the next fib number
+0178 d038 fc cf fc           	LDD	LAST+2
+0179 d03b fb cf f9           	ADDB	CUR+3	* lower byte of the lower half
+0180 d03e b9 cf f8           	ADCA	CUR+2	* upper byte of the lower half
+0181 d041 fd cf f4           	STD	RES+2
+0182                         
+0183                         * RESULT = LAST + CUR
+0184                         * calculate the upper half (2 bytes) of the next fib number
+0185 d044 fc cf fa           	LDD	LAST
+0186 d047 f9 cf f7           	ADCB	CUR+1	* lower byte of the upper half
+0187 d04a b9 cf f6           	ADCA	CUR	* lower byte of the upper half
+0188 d04d fd cf f2           	STD	RES
+0189                         
+0190                         * LAST = CUR
+0191                         * save the calculated fib number to LAST (4 bytes)
+0192 d050 fc cf f8           	LDD	CUR+2
+0193 d053 fd cf fc           	STD	LAST+2
+0194 d056 fc cf f6           	LDD	CUR
+0195 d059 fd cf fa           	STD	LAST
+0196                         
+0197                         * CUR = RES
+0198                         * save the current fib number to CUR (4 bytes)
+0199 d05c fc cf f4           	LDD	RES+2
+0200 d05f fd cf f8           	STD	CUR+2
+0201 d062 fc cf f2           	LDD	RES
+0202 d065 fd cf f6           	STD	CUR
+0203                         
+0204                         * increment the fib index counter
+0205 d068 7c cf f1           	INC	X
+0206                         
+0207 d06b 20 c3              	BRA	WHILE2
+0208                         DONE2
+0209                         * end while
+0210                         
+0211                         * return RES
+0212                         * put RES in the return value hole on the stack
+0213 d06d 30                 	TSX
+0214 d06e fc cf f2           	LDD	RES
+0215 d071 ed 02              	STD	2,X
+0216 d073 fc cf f4           	LDD	RES+2
+0217 d076 ed 04              	STD	4,X
+0218                         
+0219                         * restore register values
+0220 d078 f6 cf e2           	LDAB	REG_B
+0221 d07b fe cf e3           	LDX	REG_X
+0222 d07e 18 fe cf e5        	LDY	REG_Y
+0223                         
+0224 d082 39                 	RTS
+
+CUR        cff6
+DONE1      c028
+DONE2      d06d
+END        c028
+FIB        d000
+LAST       cffa
+N          cff0
+NARR       b000
+RADDR      cfe0
+REG_B      cfe2
+REG_X      cfe3
+REG_Y      cfe5
+RES        cff2
+RESARR     b010
+SENTIN     0000
+WHILE1     c00a
+WHILE2     d030
+X          cff1
